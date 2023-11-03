@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans  xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:context="http://www.springframework.org/schema/context"
+        xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            https://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/tx
+            http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/data/jpa
+            https://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <context:property-placeholder location="classpath:application.properties" />
+
+    <bean name="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="url" value="${spring.datasource.url}" />
+        <property name="username" value="${spring.datasource.username}" />
+        <property name="password" value="${spring.datasource.password}" />
+        <property name="driverClassName" value="${spring.datasource.driver-class-name}" />
+    </bean>
+
+    <bean name="entityMangerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="packagesToScan" value="com.example.workforcesn.Model" />
+
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+        </property>
+
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.hbm2ddl.auto">${spring.jpa.hibernate.ddl-auto}</prop>
+                <prop key="hibernate.dialect">${spring.jooq.sql-dialect}</prop>
+
+            </props>
+        </property>
+    </bean>
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityMangerFactory" />
+    </bean>
+    <tx:annotation-driven />
+    <bean id="persistenceExceptionTranslationPostProcessor" class=
+            "org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+    <!-- Enable JPA Repositories -->
+    <jpa:repositories base-package="com.example.workforcesn.Repository"/>
+    <context:component-scan base-package="com.example.workforcesn">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Repository" />
+    </context:component-scan>
+    <bean name="employService" class="com.example.workforcesn.Services.EmployService">
+        <constructor-arg index="0" ref="employRepository" />
+    </bean>
+    <bean name="departmentService" class="com.example.workforcesn.Services.DepartmentService">
+        <constructor-arg index="0" ref="departmentRepository"/>
+    </bean>
+
+</beans>
